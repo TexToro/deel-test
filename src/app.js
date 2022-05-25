@@ -1,7 +1,11 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const { sequelize } = require("./model");
-const { getProfile } = require("./middleware/getProfile");
+const { getProfile } = require("./middlewares/getProfile");
+const { validateDates } = require("./middlewares/validateDates");
+const { validateNumbers } = require("./middlewares/validateNumbers");
+
+
 const {
   ContractsController,
   JobsController,
@@ -22,8 +26,7 @@ app.post("/jobs/:jobId/pay", getProfile, JobsController.payForJob);
 
 app.post("/balances/deposit/:userId", getProfile, BalancesController.depositToClient);
 
-app.get("/admin/best-profession", getProfile, AdminController.getBestProfession);
-
-
+app.get("/admin/best-profession", validateDates, AdminController.getBestProfession);
+app.get("/admin/best-clients",validateDates, validateNumbers, AdminController.getBestClients);
 
 module.exports = app;
