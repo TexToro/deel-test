@@ -1,5 +1,6 @@
 
 const Op = require("Sequelize").Op;
+const { Transaction } = require('sequelize');
 
 module.exports = {
   async getUnpaidJobs(req, res) {
@@ -30,7 +31,7 @@ module.exports = {
     const profileId = req.profile.id;
     const userBalance = req.profile.balance;
     const { Job, Contract, Profile } = req.app.get("models");
-
+    const sequelize = req.app.get("sequelize");
     const { jobId } = req.params;
 
     const job = await Job.findOne({
@@ -45,7 +46,9 @@ module.exports = {
     if (userBalance >= job.price) {
       try {
 
-        await sequelize.transaction(async (t) => {
+        await sequelize.transaction({
+          isolationLevel: Transaction.ISOLATION_LEVELS.SERIALIZABLE
+        }, async (t) => {
           await Profile.increment('balance', { by: job.price, where: { id: job.Contract.ContractorId }, transaction: t});
           await Profile.decrement('balance', { by: job.price, where: { id: profileId }, transaction: t});
         })

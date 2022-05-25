@@ -1,4 +1,5 @@
 const Op = require("Sequelize").Op;
+const { Transaction } = require('sequelize');
 
 module.exports = {
   async depositToClient(req, res) {
@@ -12,7 +13,9 @@ module.exports = {
       return res.status(400).end();
     }
 
-    const t = await sequelize.transaction();
+    const t = await sequelize.transaction({
+      isolationLevel: Transaction.ISOLATION_LEVELS.READ_COMMITTED
+    });
 
     try {
       const totalJobsToPay = await Profile.findOne({
